@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SchemaVersion {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  notes     String?
+  appliedAt DateTime @default(now())
+}
+
+model Tenant {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String?
+  version  Int       @default(1)
+  users    User[]
+  accounts Account[]
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  tenantId      String
+  roleId        String
+  version       Int            @default(1)
+  role          Role           @relation(fields: [roleId], references: [id])
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  notifications Notification[]
+  auditLogs     AuditLog[]
+}
+
+model Role {
+  id          String @id @default(cuid())
+  name        String @unique
+  permissions String[]
+  version     Int    @default(1)
+  users       User[]
+}
+
+model Account {
+  id       String @id @default(cuid())
+  tenantId String
+  version  Int    @default(1)
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  event     String
+  payload   Json
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  actorId       String
+  action        String
+  entity        String
+  entityVersion Int?
+  diff          Json
+  createdAt     DateTime @default(now())
+  actor         User     @relation(fields: [actorId], references: [id])
+}
+
+model TrackedEvent {
+  id        String   @id @default(cuid())
+  event     String
+  props     Json
+  tenantId  String?
+  userId    String?
+  createdAt DateTime @default(now())
+}
