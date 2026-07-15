@@ -5,6 +5,10 @@ type AuditableEntity<T> = {
   snapshot: () => Promise<T>;
 };
 
+type VersionedRecord = {
+  version?: number;
+};
+
 function diffOf(before: unknown, after: unknown) {
   return {
     before,
@@ -12,7 +16,7 @@ function diffOf(before: unknown, after: unknown) {
   };
 }
 
-export async function withAudit<T>(
+export async function withAudit<T extends VersionedRecord>(
   actorId: string,
   action: string,
   entity: AuditableEntity<T>,
@@ -26,6 +30,7 @@ export async function withAudit<T>(
       actorId,
       action,
       entity: entity.id,
+      entityVersion: result.version,
       diff: diffOf(before, result),
     },
   });

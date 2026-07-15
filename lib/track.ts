@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { MODULE_VERSIONS } from "@/lib/version";
 
 type TrackProps = Record<string, unknown>;
 
@@ -11,7 +12,10 @@ export async function track(event: string, props: TrackProps, context: TrackCont
   await db.trackedEvent.create({
     data: {
       event,
-      props,
+      props: {
+        ...props,
+        trackerVersion: MODULE_VERSIONS.tracking,
+      },
       tenantId: context.tenantId,
       userId: context.userId,
     },

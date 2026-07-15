@@ -1,10 +1,12 @@
 import { db } from "@/lib/db";
+import { MODULE_VERSIONS } from "@/lib/version";
 
 type Channel = "email" | "push" | "inapp";
 
 type NotificationPayload = {
   event: string;
   message: string;
+  moduleVersion: string;
 };
 
 type Sender = {
@@ -27,6 +29,7 @@ function buildPayload(event: string): NotificationPayload {
   return {
     event,
     message: `Event: ${event}`,
+    moduleVersion: MODULE_VERSIONS.notify,
   };
 }
 
